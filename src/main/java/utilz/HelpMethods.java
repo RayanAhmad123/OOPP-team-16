@@ -7,6 +7,8 @@ import static main.Game.GAME_HEIGHT;
 
 public class HelpMethods {
 
+    
+
     public static boolean CanMoveHere(float x,float y,float width,float height,int[][] lvlData){
         if (!IsSolid(x, y, lvlData))
             if (!IsSolid(x + width, y + height, lvlData))
@@ -26,10 +28,11 @@ public class HelpMethods {
         float yIndex = y / Game.TILES_SIZE;
 
         int value = lvlData[(int) yIndex][(int) xIndex];
+
         //antal tiles - ej negativa - genomskinliga tilen
-        if (value >= 81 || value < 0 || value != 80)
-            return true;
-        return false;
+        if (value == 80 || value == 39 || value == 41 || value == 45 || value == 46)
+            return false;
+        return true;
     }
 
     public static float GetEntityXPosNextToWall(Rectangle2D.Float hitbox, float xSpeed){
@@ -91,4 +94,27 @@ public class HelpMethods {
             e.printStackTrace();
         }
     }
+
+    public static boolean IsOnLevelEnd(Rectangle2D.Float hitbox, int[][] lvlData) {
+        // Check all corners of the hitbox for the level-end tile (45)
+        int leftTile = (int) (hitbox.x / Game.TILES_SIZE);
+        int rightTile = (int) ((hitbox.x + hitbox.width) / Game.TILES_SIZE);
+        int topTile = (int) (hitbox.y / Game.TILES_SIZE);
+        int bottomTile = (int) ((hitbox.y + hitbox.height) / Game.TILES_SIZE);
+
+        // Bounds check
+        if (leftTile < 0 || rightTile >= lvlData[0].length || topTile < 0 || bottomTile >= lvlData.length)
+            return false;
+
+        // Check if any part of the hitbox is on tile 45
+        for (int y = topTile; y <= bottomTile; y++) {
+            for (int x = leftTile; x <= rightTile; x++) {
+                if (lvlData[y][x] == 45) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

@@ -1,17 +1,240 @@
 package Levels;
 
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import entities.Entity;
+import entities.MovingPlatform;
+import entities.Spike;
+import entities.TriggerPlatform;
+import main.Game;
+
 public class Level {
     private int[][] lvlData;
+    private int[][] lvlObstacleData;
+    private int[][] lvlObjData;
+    private float spawnX, spawnY;
+    private int deathScore;
+    private List<MovingPlatform> movingPlatforms;
+    private List<TriggerPlatform> triggerPlatforms;
+    private List<Spike> spikes;
+    
+    // Store which tile positions are trigger platforms (so we don't draw them as tiles)
+    private List<int[]> triggerPlatformPositions;
 
-    public Level(int[][] lvlData){
+    public Level(int[][] lvlData, int[][] lvlObstacleData, int[][] lvlObjData, float spawnX, float spawnY){
         this.lvlData = lvlData;
+        this.lvlObstacleData = lvlObstacleData;
+        this.lvlObjData = lvlObjData;
+        this.spawnX = spawnX;
+        this.spawnY = spawnY;
+        this.movingPlatforms = new ArrayList<>();
+        this.triggerPlatforms = new ArrayList<>();
+        this.spikes = new ArrayList<>();
+        this.triggerPlatformPositions = new ArrayList<>();
+    }
+    
+    /**
+     * Scans level data for specific tile IDs and creates TriggerPlatforms from them.
+     * @param tileId The tile ID to look for in the level data
+     * @param targetOffsetX How far the platform moves in X when triggered
+     * @param targetOffsetY How far the platform moves in Y when triggered
+     * @param speed Movement speed
+     * @param sprites Array of sprites indexed by tile ID
+     * @param shouldReturn Whether platform returns to start after reaching target
+     * @param solid Whether player can stand on this platform
+     */
+    public void createTriggerPlatformsFromTile(int tileId,int spriteId, float targetOffsetX, float targetOffsetY, 
+                                                float speed, BufferedImage[] sprites, boolean shouldReturn, boolean solid) {
+        for (int y = 0; y < lvlObstacleData.length; y++) {
+            for (int x = 0; x < lvlObstacleData[y].length; x++) {
+                if (lvlObstacleData[y][x] == tileId) {
+                    float posX = x * Game.TILES_SIZE;
+                    float posY = y * Game.TILES_SIZE;
+                    
+                    TriggerPlatform platform = new TriggerPlatform(
+                        posX, posY,
+                        posX + targetOffsetX, posY + targetOffsetY,
+                        Game.TILES_SIZE, Game.TILES_SIZE,
+                        speed,
+                        sprites[spriteId]
+                    , shouldReturn);
+                    platform.setSolid(solid);
+                    triggerPlatforms.add(platform);
+                    
+                    // Mark this position so we don't draw the tile
+                    triggerPlatformPositions.add(new int[]{x, y});
+                    
+                    // Replace tile with transparent/empty tile in level data
+                    lvlData[y][x] = 80; // 80 = transparent tile
+                }
+            }
+        }
+    }
+    
+    public boolean isTriggerPlatformPosition(int x, int y) {
+        for (int[] pos : triggerPlatformPositions) {
+            if (pos[0] == x && pos[1] == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Check if player is standing on any solid platform
+     */
+    public boolean isOnSolidPlatform(java.awt.geom.Rectangle2D.Float playerHitbox) {
+        for (TriggerPlatform platform : triggerPlatforms) {
+            if (platform.isSolid()) {
+                java.awt.geom.Rectangle2D.Float platHitbox = platform.getSpriteHitbox();
+                // Check if player's bottom is on platform's top
+                float playerBottom = playerHitbox.y + playerHitbox.height;
+                float platformTop = platHitbox.y;
+                
+                boolean verticallyAligned = playerBottom >= platformTop && playerBottom <= platformTop + 5;
+                boolean horizontallyOverlapping = 
+                    playerHitbox.x + playerHitbox.width > platHitbox.x && 
+                    playerHitbox.x < platHitbox.x + platHitbox.width;
+                
+                if (verticallyAligned && horizontallyOverlapping) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Get the Y position of the platform the player is standing on
+     */
+    public float getSolidPlatformY(java.awt.geom.Rectangle2D.Float playerHitbox) {
+        for (TriggerPlatform platform : triggerPlatforms) {
+            if (platform.isSolid()) {
+                java.awt.geom.Rectangle2D.Float platHitbox = platform.getSpriteHitbox();
+                float playerBottom = playerHitbox.y + playerHitbox.height;
+                float platformTop = platHitbox.y;
+                
+                boolean verticallyClose = playerBottom >= platformTop - 10 && playerBottom <= platformTop + 10;
+                boolean horizontallyOverlapping = 
+                    playerHitbox.x + playerHitbox.width > platHitbox.x && 
+                    playerHitbox.x < platHitbox.x + platHitbox.width;
+                
+                if (verticallyClose && horizontallyOverlapping) {
+                    return platformTop - playerHitbox.height;
+                }
+            }
+        }
+        return -1;
+    }
+    
+    public void addMovingPlatform(MovingPlatform platform) {
+        movingPlatforms.add(platform);
+    }
+    
+    public void addTriggerPlatform(TriggerPlatform platform) {
+        triggerPlatforms.add(platform);
+    }
+    
+    public void updatePlatforms(Entity player) {
+        for (MovingPlatform platform : movingPlatforms) {
+            platform.update();
+        }
+        for (TriggerPlatform platform : triggerPlatforms) {
+            // Check if player touches the platform
+            if (!platform.isTriggered() && platform.checkPlayerCollision(player)) {
+                platform.trigger();
+            }
+            platform.update();
+        }
+    }
+    
+    public void drawPlatforms(Graphics g) {
+        for (MovingPlatform platform : movingPlatforms) {
+            platform.render(g);
+        }
+        for (TriggerPlatform platform : triggerPlatforms) {
+            platform.render(g);
+        }
+    }
+    
+    public List<MovingPlatform> getMovingPlatforms() {
+        return movingPlatforms;
+    }
+    
+    public List<TriggerPlatform> getTriggerPlatforms() {
+        return triggerPlatforms;
+    }
+    
+    public void resetPlatforms() {
+        for (TriggerPlatform platform : triggerPlatforms) {
+            platform.reset();
+        }
+    }
+    
+    public void createSpikesFromTile(int tileId, int spriteId, BufferedImage[] sprites) {
+        for (int y = 0; y < lvlObstacleData.length; y++) {
+            for (int x = 0; x < lvlObstacleData[y].length; x++) {
+                if (lvlObstacleData[y][x] == tileId) {
+                    float posX = x * Game.TILES_SIZE;
+                    float posY = y * Game.TILES_SIZE;
+                    
+                    Spike spike = new Spike(posX, posY, Game.TILES_SIZE, Game.TILES_SIZE, sprites[spriteId]);
+                    spikes.add(spike);
+                }
+            }
+        }
+    }
+    
+    public boolean checkSpikeCollision(Entity player) {
+        for (Spike spike : spikes) {
+            if (spike.checkPlayerCollision(player)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void drawSpikes(Graphics g) {
+        for (Spike spike : spikes) {
+            spike.render(g);
+        }
     }
 
     public int getSpriteIndex (int x, int y){
         return lvlData[y][x];
     }
+    
+    public int getObjectSpriteIndex(int x, int y) {
+        return lvlObjData[y][x];
+    }
 
     public int[][] getLevelData(){
         return lvlData;
+    }
+    
+    public float getSpawnX() {
+        return spawnX;
+    }
+    
+    public float getSpawnY() {
+        return spawnY;
+    }
+
+    public void updateDeathScore(int death){
+        if (death == 0) {
+            this.deathScore = death;
+        }else if (death < getDeathCount()) {
+            this.deathScore = death;
+        }else{
+            
+        }
+        this.deathScore += 1;
+    }
+
+    public int getDeathCount(){
+        return this.deathScore;
     }
 }

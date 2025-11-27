@@ -11,10 +11,16 @@ import main.Game;
 
 public class LoadSave {
 
-    public static final String PLAYER_ATLAS = "Character2.png";
+    public static final String PLAYER_ATLAS = "Character.png";
     public static final String LEVEL_ATLAS = "MAP_TILES.png";
-    public static final String LEVEL_ONE_DATA = "Level_One_Data.png";
+    public static final String OBJECT_ATLAS = "OBJ_TILES.png";
+    public static final String LEVEL_ONE_DATA = "Level1.png";
+    public static final String LEVEL_ONE_OBSTACLE_DATA = "Level1Obstacles.png";
+    public static final String LEVEL_ONE_OBJ_DATA = "Level1Objects.png";
+    public static final String LEVEL_TWO_DATA = "Level2.png";
+    public static final String LEVEL_THREE_DATA = "Level3.png";
     public static final String BG_DATA = "Background.png";
+    public static final String TRANSITION_IMG = "Transition.png"; // Add your transition image
     
     public static BufferedImage GetSpriteAtlas(String fileName){
         BufferedImage img = null;
@@ -36,15 +42,51 @@ public class LoadSave {
         return img;
     }
 
-    public static int[][] GetLevelData(){
+    public static int[][] GetLevelData(String levelFileName){
         int[][] lvlData = new int[Game.TILES_IN_HEIGHT][Game.TILES_IN_WIDTH];
-        BufferedImage img = GetSpriteAtlas(LEVEL_ONE_DATA);
+        BufferedImage img = GetSpriteAtlas(levelFileName);
 
 
         for (int j = 0; j < (int)img.getHeight(); j++) {
            for (int i = 0; i < (int)img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
                 int value = color.getRed();
+                if (value >= 80 ) {
+                    value = 80;
+                }
+                lvlData[j][i] = value;
+           } 
+        }
+        return lvlData;
+    }
+
+    public static int[][] GetLevelObstacleData(String levelFileName){
+        int[][] lvlData = new int[Game.TILES_IN_HEIGHT][Game.TILES_IN_WIDTH];
+        BufferedImage img = GetSpriteAtlas(levelFileName);
+
+
+        for (int j = 0; j < (int)img.getHeight(); j++) {
+           for (int i = 0; i < (int)img.getWidth(); i++) {
+                Color color = new Color(img.getRGB(i, j));
+                int value = color.getGreen();
+                if (value >= 80 ) {
+                    value = 80;
+                }
+                lvlData[j][i] = value;
+           } 
+        }
+        return lvlData;
+    }
+
+        public static int[][] GetLevelObjData(String levelFileName){
+        int[][] lvlData = new int[Game.TILES_IN_HEIGHT][Game.TILES_IN_WIDTH];
+        BufferedImage img = GetSpriteAtlas(levelFileName);
+
+
+        for (int j = 0; j < (int)img.getHeight(); j++) {
+           for (int i = 0; i < (int)img.getWidth(); i++) {
+                Color color = new Color(img.getRGB(i, j));
+                int value = color.getBlue();
                 if (value >= 80 ) {
                     value = 80;
                 }
