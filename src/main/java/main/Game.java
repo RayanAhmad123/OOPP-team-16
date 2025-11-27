@@ -88,6 +88,7 @@ public class Game implements Runnable {
             boolean playerCurrentlyDead = player.getHitbox().x > 1500; // Player moved off-screen when dead
             if (playerWasDead && !playerCurrentlyDead) {
                 levelManager.getCurrentLvl().resetPlatforms();
+                levelManager.getCurrentLvl().triggerSpawnPlatform();
             }
             playerWasDead = playerCurrentlyDead;
             
@@ -144,6 +145,7 @@ public class Game implements Runnable {
         case PLAYING:
             levelManager.draw(g);
             player.render(g);
+            levelManager.getCurrentLvl().drawSpawnPlatform(g); // Draw in front of player
             drawHUD(g);
             break;
         case MENU:

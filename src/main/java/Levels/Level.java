@@ -7,6 +7,7 @@ import java.util.List;
 
 import entities.Entity;
 import entities.MovingPlatform;
+import entities.SpawnPlatform;
 import entities.Spike;
 import entities.TriggerPlatform;
 import main.Game;
@@ -20,6 +21,7 @@ public class Level {
     private List<MovingPlatform> movingPlatforms;
     private List<TriggerPlatform> triggerPlatforms;
     private List<Spike> spikes;
+    private SpawnPlatform spawnPlatform;
     
     // Store which tile positions are trigger platforms (so we don't draw them as tiles)
     private List<int[]> triggerPlatformPositions;
@@ -201,6 +203,32 @@ public class Level {
         for (Spike spike : spikes) {
             spike.render(g);
         }
+    }
+    
+    public void setSpawnPlatform(SpawnPlatform platform) {
+        this.spawnPlatform = platform;
+    }
+    
+    public void updateSpawnPlatform() {
+        if (spawnPlatform != null) {
+            spawnPlatform.update();
+        }
+    }
+    
+    public void drawSpawnPlatform(Graphics g) {
+        if (spawnPlatform != null) {
+            spawnPlatform.render(g);
+        }
+    }
+    
+    public void triggerSpawnPlatform() {
+        if (spawnPlatform != null) {
+            spawnPlatform.triggerSpawn();
+        }
+    }
+    
+    public boolean isSpawnPlatformAnimating() {
+        return spawnPlatform != null && spawnPlatform.isAnimating();
     }
 
     public int getSpriteIndex (int x, int y){

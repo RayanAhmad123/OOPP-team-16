@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import entities.SpawnPlatform;
 import main.Game;
 import static main.Game.GAME_HEIGHT;
 import static main.Game.GAME_WIDTH;
@@ -33,11 +34,11 @@ public class LevelManager {
             LoadSave.GetLevelData(LoadSave.LEVEL_ONE_DATA),
             LoadSave.GetLevelObstacleData(LoadSave.LEVEL_ONE_OBSTACLE_DATA),
             LoadSave.GetLevelObjData(LoadSave.LEVEL_ONE_OBJ_DATA),
-            200, 550);
+            200, 600);
         level1.createTriggerPlatformsFromTile(1,73, 0, 200, 2f, levelSprite, true, false);
         level1.createTriggerPlatformsFromTile(2,72, 100, 50, 2f, levelSprite, true, true);
-        // Create spikes from tile ID 3, using sprite 74 (adjust sprite ID to your spike sprite)
         level1.createSpikesFromTile(3, 41, objectSprite);
+        level1.setSpawnPlatform(new SpawnPlatform(200, 500, TILES_SIZE * 1, TILES_SIZE * 4, 100, 3f, levelSprite[72]));
         levels.add(level1);
         
         // Level 2
@@ -102,6 +103,7 @@ public class LevelManager {
     public void update(){
         // Update moving platforms (pass player for trigger detection)
         getCurrentLvl().updatePlatforms(game.getPlayer());
+        getCurrentLvl().updateSpawnPlatform();
     }
 
     public Level getCurrentLvl() {
