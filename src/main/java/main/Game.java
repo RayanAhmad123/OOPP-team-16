@@ -10,6 +10,7 @@ import entities.Player;
 import main.states.Leaderboard;
 import main.states.MainMenu;
 import utilz.LoadSave;
+import audio.controller.AudioController;
 
 public class Game implements Runnable {
 
@@ -21,6 +22,7 @@ public class Game implements Runnable {
 
     private Player player;
     private LevelManager levelManager;
+    private AudioController audioController; // audio
 
     public final static int TILES_DEAFULT_SIZE = 32;
     public final static float SCALE = 1.0f;
@@ -36,7 +38,7 @@ public class Game implements Runnable {
 
     public MainMenu mainMenu;
     public Leaderboard leaderboard;
-    
+
     // Level transition
     private BufferedImage transitionImage;
     private boolean inTransition = false;
@@ -44,15 +46,19 @@ public class Game implements Runnable {
     private boolean scalingUp = true;
     private boolean levelLoaded = false;
     private final float TRANSITION_SPEED = 0.015f;
-    
+
     // Track player death for platform reset
     private boolean playerWasDead = false;
 
     public Game() {
+        audioController = new AudioController();
         initClasses();
         gamePanel = new GamePanel(this);
         gameWindow = new GameWindow(gamePanel);
         gamePanel.requestFocus();
+
+        //menu music
+        audioController.playMenuMusic();
 
         startGameLoop();
     }
@@ -61,12 +67,12 @@ public class Game implements Runnable {
         levelManager = new LevelManager(this);
         player = new Player(200, 550, (int) (32 * SCALE), (int) (32 * SCALE));
         loadPlayerForCurrentLevel();
-        
+
         transitionImage = LoadSave.GetSpriteAtlas(LoadSave.TRANSITION_IMG);
 
         mainMenu = new MainMenu(this);
     }
-    
+
     private void loadPlayerForCurrentLevel() {
         Levels.Level currentLevel = levelManager.getCurrentLvl();
         player.setSpawnPoint(currentLevel.getSpawnX(), currentLevel.getSpawnY());
@@ -81,7 +87,7 @@ public class Game implements Runnable {
             updateTransition();
             return;
         }
-        
+
         switch (gameState) {
         case PLAYING:
             // Check if player just respawned (was dead, now alive)
@@ -90,7 +96,7 @@ public class Game implements Runnable {
                 levelManager.getCurrentLvl().resetPlatforms();
             }
             playerWasDead = playerCurrentlyDead;
-            
+
             player.update();
             levelManager.update();
             if (player.hasReachedLevelEnd()) {
@@ -105,7 +111,7 @@ public class Game implements Runnable {
             break;
         }
     }
-    
+
     private void startLevelTransition() {
         inTransition = true;
         scalingUp = true;
@@ -113,7 +119,7 @@ public class Game implements Runnable {
         transitionScale = 0f;
         player.resetLevelEnd();
     }
-    
+
     private void updateTransition() {
         if (scalingUp) {
             transitionScale += TRANSITION_SPEED;
@@ -159,30 +165,30 @@ public class Game implements Runnable {
             //leaderboard.draw(g); TODO
             break;
         }
-        
+
         // Draw transition overlay on top
         if (inTransition && transitionImage != null) {
             drawTransition(g);
         }
     }
-    
+
     private void drawTransition(Graphics g) {
         // Scale from 0 to cover the entire screen
         int scaledWidth = (int) (GAME_WIDTH * transitionScale * 1.5f);
         int scaledHeight = (int) (GAME_HEIGHT * transitionScale * 1.5f);
-        
+
         // Center the image
         int x = (GAME_WIDTH - scaledWidth) / 2;
         int y = (GAME_HEIGHT - scaledHeight) / 2;
-        
-        g.drawImage(transitionImage, (int)(player.getHitbox().x - (scaledWidth / 2)), (int)player.getHitbox().y - (scaledHeight / 2) , scaledWidth, scaledHeight, null);
+
+        g.drawImage(transitionImage, (int) (player.getHitbox().x - (scaledWidth / 2)), (int) player.getHitbox().y - (scaledHeight / 2), scaledWidth, scaledHeight, null);
     }
-    
+
     private void drawHUD(Graphics g) {
         // Background for HUD
         g.setColor(new Color(0, 0, 0, 150));
         g.fillRoundRect(10, 10, 200, 60, 10, 10);
-        
+
         // Text
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 16));
@@ -247,11 +253,21 @@ public class Game implements Runnable {
         return gameState;
     }
 
+    public AudioController getAudioController() {
+        return audioController;
+    }
+
     public void setGameState(GameState newState) {
         this.gameState = newState;
         if (newState == GameState.PLAYING) {
             loadPlayerForCurrentLevel();
         }
+
+        switch (newState) {
+        case MENU -> audioController.playMenuMusic();
+        case PLAYING -> audioController.playGameMusic();
+        case LEADERBOARD -> audioController.stopAll();
+        }
     }
-    
+
 }

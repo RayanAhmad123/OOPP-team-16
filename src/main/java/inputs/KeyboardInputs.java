@@ -34,6 +34,8 @@ public class KeyboardInputs implements KeyListener {
         case KeyEvent.VK_SPACE:
         case KeyEvent.VK_UP:
         case KeyEvent.VK_W:
+            //Jump sound
+            gamePanel.getGame().getAudioController().playJump();
             gamePanel.getGame().getPlayer().setJump(true);
             break;
         case KeyEvent.VK_ESCAPE:
@@ -41,7 +43,6 @@ public class KeyboardInputs implements KeyListener {
             break;
         default:
             // do nothing for unhandled keys
-            //throw new AssertionError();
             break;
         }
     }
@@ -63,7 +64,7 @@ public class KeyboardInputs implements KeyListener {
             gamePanel.getGame().getPlayer().setJump(false);
             break;
         default:
-            // do nothing
+            //do nothing
             break;
         }
     }
