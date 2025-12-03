@@ -1,16 +1,18 @@
-/target/
+target/
 *.class
 *.jar
 *.war
 *.ear
 
-/.idea/
+.idea/
 *.iml
-/.vscode/
+
+.vscode/
 .classpath
 .project
 .settings/
-/out/
+
+out/
 /*.iml
 
 .DS_Store

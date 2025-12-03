@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -50,6 +51,16 @@ public class Game implements Runnable {
     // Track player death for platform reset
     private boolean playerWasDead = false;
 
+    // Player name
+    private String playerName = "Player1";
+
+    // Run tracking
+    private long runStartTimeNanos;
+    private int totalDeathsForRun;
+
+    // Pause flag that when true, gameplay updates are frozen
+    private boolean paused = false;
+
     public Game() {
         audioController = new AudioController();
         initClasses();
@@ -66,11 +77,13 @@ public class Game implements Runnable {
     private void initClasses() {
         levelManager = new LevelManager(this);
         player = new Player(200, 550, (int) (32 * SCALE), (int) (32 * SCALE));
+        player.setGame(this);
         loadPlayerForCurrentLevel();
 
         transitionImage = LoadSave.GetSpriteAtlas(LoadSave.TRANSITION_IMG);
 
         mainMenu = new MainMenu(this);
+        leaderboard = new Leaderboard(this);
     }
 
     private void loadPlayerForCurrentLevel() {
@@ -91,6 +104,10 @@ public class Game implements Runnable {
 
         switch (gameState) {
         case PLAYING:
+            if (paused) {
+                // When paused, skip updating player and level
+                return;
+            }
             boolean playerCurrentlyDead = player.getHitbox().x > 1500;
             if (!playerWasDead && playerCurrentlyDead) {
                 // Player just died
@@ -112,7 +129,7 @@ public class Game implements Runnable {
             mainMenu.update();
             break;
         case LEADERBOARD:
-            //leaderboard.update(); TODOOOO
+            leaderboard.update();
             break;
         }
     }
@@ -158,18 +175,17 @@ public class Game implements Runnable {
             player.render(g); // Player on top of object layer
             levelManager.getCurrentLvl().drawSpawnPlatform(g); // Draw in front of player
             drawHUD(g);
+
+            // If paused, draw overlay on top of gameplay
+            if (paused) {
+                drawPauseOverlay(g);
+            }
             break;
         case MENU:
             mainMenu.draw(g);
             break;
         case LEADERBOARD:
-            // leaderboard placeholder
-            g.setColor(java.awt.Color.BLACK);
-            g.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            g.setColor(java.awt.Color.WHITE);
-            g.drawString("Leaderboard - Press ESC to return", 50, 50);
-
-            //leaderboard.draw(g); TODO
+            leaderboard.draw(g);
             break;
         }
 
@@ -192,15 +208,40 @@ public class Game implements Runnable {
     }
 
     private void drawHUD(Graphics g) {
-        // Background for HUD
+        //Background
         g.setColor(new Color(0, 0, 0, 150));
         g.fillRoundRect(10, 10, 200, 60, 10, 10);
 
-        // Text
+        //Text fonting
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 16));
         g.drawString("Level: " + (levelManager.getCurrentLevelIndex() + 1), 20, 35);
         g.drawString("Deaths: " + player.getDeathCount(), 20, 55);
+    }
+
+    private void drawPauseOverlay(Graphics g) {
+        // Semi-transparent black overlay
+        g.setColor(new Color(0, 0, 0, 150));
+        g.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        //final centered "PAUSED" text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 48));
+        String text = "PAUSED";
+        FontMetrics fm = g.getFontMetrics();
+        int textWidth = fm.stringWidth(text);
+        int x = (GAME_WIDTH - textWidth) / 2;
+        int y = (GAME_HEIGHT - fm.getHeight()) / 2 + fm.getAscent();
+        g.drawString(text, x, y);
+
+        //hint: "press to resume" text
+        g.setFont(new Font("Arial", Font.PLAIN, 18));
+        String hint = "Press P to resume game";
+        fm = g.getFontMetrics();
+        int hintWidth = fm.stringWidth(hint);
+        int hx = (GAME_WIDTH - hintWidth) / 2;
+        int hy = y + 40;
+        g.drawString(hint, hx, hy);
     }
 
     private void startGameLoop() {
@@ -264,10 +305,36 @@ public class Game implements Runnable {
         return audioController;
     }
 
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        if (playerName != null && !playerName.isBlank()) {
+            this.playerName = playerName.trim();
+        }
+    }
+
     public void setGameState(GameState newState) {
+        GameState oldState = this.gameState;
         this.gameState = newState;
-        if (newState == GameState.PLAYING) {
+
+        // Going back to main menu will reset
+        if (newState == GameState.MENU && oldState == GameState.PLAYING) {
+            //reset level index
+            levelManager.resetToFirstLevel();
+            //reset run stats
+            totalDeathsForRun = 0;
+            runStartTimeNanos = 0L;
+            //reload player
             loadPlayerForCurrentLevel();
+        }
+
+        // If we are starting to play from the menu, start a fresh run (timer & deaths)
+        // Speedfix to allow the game to reset if going back to mainmenu.
+        if (newState == GameState.PLAYING && oldState == GameState.MENU) {
+            totalDeathsForRun = 0;
+            runStartTimeNanos = System.nanoTime();
         }
 
         switch (newState) {
@@ -277,4 +344,20 @@ public class Game implements Runnable {
         }
     }
 
+    public void onPlayerDeath() {
+        totalDeathsForRun++;
+    }
+
+    public void onLevelCompleted() {
+        long runEndTimeNanos = System.nanoTime();
+        double timeMs = (runEndTimeNanos - runStartTimeNanos) / 1000000.0;
+        int levelIndex = levelManager.getCurrentLevelIndex();
+        LoadSave.appendToScoreFile(playerName, levelIndex, timeMs, totalDeathsForRun);
+    }
+
+    public void togglePause() {
+        if (gameState == GameState.PLAYING && !inTransition) {
+            paused = !paused;
+        }
+    }
 }

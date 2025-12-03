@@ -17,11 +17,26 @@ public class KeyboardInputs implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        // when editing name in main menu, collect characters here
+        if (gamePanel.getGame().getGameState() == Game.GameState.MENU &&
+            gamePanel.getGame().mainMenu != null &&
+            gamePanel.getGame().mainMenu.isEditingName()) {
+            gamePanel.getGame().mainMenu.handleNameKeyPressed(0, e.getKeyChar());
+        }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (gamePanel.getGame().getGameState() == Game.GameState.MENU &&
+            gamePanel.getGame().mainMenu != null &&
+            gamePanel.getGame().mainMenu.isEditingName()) {
+            int code = e.getKeyCode();
+            if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_ESCAPE || code == KeyEvent.VK_BACK_SPACE) {
+                gamePanel.getGame().mainMenu.handleNameKeyPressed(code, '\0');
+            }
+            return;
+        }
+
         switch (e.getKeyCode()) {
         case KeyEvent.VK_A:
         case KeyEvent.VK_LEFT:
@@ -38,6 +53,10 @@ public class KeyboardInputs implements KeyListener {
             gamePanel.getGame().getAudioController().playJump();
             gamePanel.getGame().getPlayer().setJump(true);
             break;
+        case KeyEvent.VK_P:
+            // toggle pause when pressing 'P'
+            gamePanel.getGame().togglePause();
+            break;
         case KeyEvent.VK_ESCAPE:
             gamePanel.getGame().setGameState(Game.GameState.MENU);
             break;
@@ -49,6 +68,12 @@ public class KeyboardInputs implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+        if (gamePanel.getGame().getGameState() == Game.GameState.MENU &&
+            gamePanel.getGame().mainMenu != null &&
+            gamePanel.getGame().mainMenu.isEditingName()) {
+            return;
+        }
+
         switch (e.getKeyCode()) {
         case KeyEvent.VK_A:
         case KeyEvent.VK_LEFT:
