@@ -3,9 +3,10 @@ package Levels;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import entities.SpawnPlatform;
 import main.Game;
 import static main.Game.GAME_HEIGHT;
 import static main.Game.GAME_WIDTH;
@@ -20,12 +21,15 @@ public class LevelManager {
     private BufferedImage deathSprite;
     private List<Level> levels;
     private int currentLevelIndex = 0;
+    private Set<Integer> completedLevels = new HashSet<>();
 
 
     public LevelManager(Game game){
         this.game = game;
         importOutsideSprites();
         buildAllLevels();
+        // Level 1 is always unlocked
+        completedLevels.add(0);
     }
     
     private void buildAllLevels() {
@@ -34,51 +38,70 @@ public class LevelManager {
         deathSprite = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_DEAD);
         
         // Level 1
+        LevelConfigLoader.LevelConfig config1 = LevelConfigLoader.loadConfig("level1.txt");
         Level level1 = new Level(
             LoadSave.GetLevelData(LoadSave.LEVEL_ONE_DATA),
             LoadSave.GetLevelObstacleData(LoadSave.LEVEL_ONE_OBSTACLE_DATA),
             LoadSave.GetLevelObjData(LoadSave.LEVEL_ONE_OBJ_DATA),
-            230, 600);
-        level1.createGroupedTriggerPlatformFromTile(1, 32, 0,2f, levelSprite, true, true);
-        level1.createGroupedTriggerPlatformFromTile(2, 32, 0,2f, levelSprite, true, true);
-        level1.createSpikesFromTile(3, 41, objectSprite);
-        level1.setSpawnPlatform(new SpawnPlatform(224, 448, TILES_SIZE * 1, TILES_SIZE * 4, 64, 3f, spawnTube));
+            config1.spawnX, config1.spawnY);
+        LevelConfigLoader.applyConfig(level1, config1, levelSprite, objectSprite, spawnTube);
+        level1.setAudioControllerForPlatforms(game.getAudioController());
         levels.add(level1);
         
         // Level 2
-        Level level2 = new Level(LoadSave.GetLevelData(LoadSave.LEVEL_TWO_DATA),
+        LevelConfigLoader.LevelConfig config2 = LevelConfigLoader.loadConfig("level2.txt");
+        Level level2 = new Level(
+            LoadSave.GetLevelData(LoadSave.LEVEL_TWO_DATA),
             LoadSave.GetLevelObstacleData(LoadSave.LEVEL_TWO_OBSTACLE_DATA),
             LoadSave.GetLevelObjData(LoadSave.LEVEL_TWO_OBJ_DATA),
-            100, 400);
-        level2.setSpawnPlatform(new SpawnPlatform(96, 256, TILES_SIZE * 1, TILES_SIZE * 4, 64, 3f, spawnTube));
-        level2.createGroupedTriggerPlatformFromTile(1, 32, 0, 3f, levelSprite, false, true);
-        level2.createGroupedTriggerPlatformFromTile(3, 62, 0, 3f, levelSprite, true, true);
-        level2.createGroupedTriggerPlatformFromTile(4, -32, 32, 3f, levelSprite, false, true);
-        level2.createTriggerSpikesFromTile(2, 41, 0, -16, 5f, 100f, objectSprite, false);
+            config2.spawnX, config2.spawnY);
+        LevelConfigLoader.applyConfig(level2, config2, levelSprite, objectSprite, spawnTube);
+        level2.setAudioControllerForPlatforms(game.getAudioController());
         levels.add(level2);
         
         // Level 3
-        Level level3 = new Level(LoadSave.GetLevelData(LoadSave.LEVEL_THREE_DATA),
+        LevelConfigLoader.LevelConfig config3 = LevelConfigLoader.loadConfig("level3.txt");
+        Level level3 = new Level(
+            LoadSave.GetLevelData(LoadSave.LEVEL_THREE_DATA),
             LoadSave.GetLevelObstacleData(LoadSave.LEVEL_THREE_OBSTACLE_DATA),
             LoadSave.GetLevelObjData(LoadSave.LEVEL_THREE_OBJ_DATA),
-            100, 150);
-        level3.setSpawnPlatform(new SpawnPlatform(96, 96, TILES_SIZE * 1, TILES_SIZE * 4, 64, 3f, spawnTube));
-        level3.createTriggerSpikesFromTile(1, 41, 0, -16, 5f, 50f, objectSprite, false);
-        level3.createTriggerSpikesFromTile(2, 41, 0, -16, 5f, 50f, objectSprite, false);
-        level3.createTriggerSpikesFromTile(3, 41, 0, -16, 5f, 50f, objectSprite, false);
-        level3.createTriggerSpikesFromTile(4, 41, 0, -16, 5f, 50f, objectSprite, false);
-        level3.createTriggerSpikesFromTile(5, 42, 0, 48, 5f, 50f, objectSprite, false);
-        level3.createGroupedTriggerPlatformFromTile(6, 64, 0, 5f, levelSprite, false, true);
-        level3.createTriggerSpikesFromTile(7, 41, 0, -16, 5f, 60f, objectSprite, true);
-        level3.createTriggerSpikesFromTile(8, 41, 0, -16, 5f, 60f, objectSprite, true);
-        level3.createTriggerSpikesFromTile(9, 41, 0, -96, 2f, 50f, objectSprite, true);
-        level3.createTriggerSpikesFromTile(11, 42, 0, 48, 2f, 80f, objectSprite, true);
-        level3.createTriggerSpikesFromTile(12, 42, 0, 48, 2f, 80f, objectSprite, true);
-        level3.createTriggerSpikesFromTile(13, 42, 0, 48, 2f, 80f, objectSprite, true);
-        level3.createTriggerSpikesFromTile(14, 42, 0, 48, 2f, 80f, objectSprite, true);
-        level3.createGroupedTriggerPlatformFromTile(10, -64, 0, 5f, levelSprite, true, true);
-        level3.setSpawnPlatform(new SpawnPlatform(96, 0, TILES_SIZE * 1, TILES_SIZE * 4, 64, 3f, spawnTube));
+            config3.spawnX, config3.spawnY);
+        LevelConfigLoader.applyConfig(level3, config3, levelSprite, objectSprite, spawnTube);
+        level3.setAudioControllerForPlatforms(game.getAudioController());
         levels.add(level3);
+
+        // Level 4
+        LevelConfigLoader.LevelConfig config4 = LevelConfigLoader.loadConfig("level4.txt");
+        Level level4 = new Level(
+            LoadSave.GetLevelData(LoadSave.LEVEL_FOUR_DATA),
+            LoadSave.GetLevelObstacleData(LoadSave.LEVEL_FOUR_OBSTACLE_DATA),
+            LoadSave.GetLevelObjData(LoadSave.LEVEL_FOUR_OBJ_DATA),
+            config4.spawnX, config4.spawnY);
+        LevelConfigLoader.applyConfig(level4, config4, levelSprite, objectSprite, spawnTube);
+        level4.setAudioControllerForPlatforms(game.getAudioController());
+        levels.add(level4);
+
+        // Level 5
+        LevelConfigLoader.LevelConfig config5 = LevelConfigLoader.loadConfig("level5.txt");
+        Level level5 = new Level(
+            LoadSave.GetLevelData(LoadSave.LEVEL_FIVE_DATA),
+            LoadSave.GetLevelObstacleData(LoadSave.LEVEL_FIVE_OBSTACLE_DATA),
+            LoadSave.GetLevelObjData(LoadSave.LEVEL_FIVE_OBJ_DATA),
+            config5.spawnX, config5.spawnY);
+        LevelConfigLoader.applyConfig(level5, config5, levelSprite, objectSprite, spawnTube);
+        level5.setAudioControllerForPlatforms(game.getAudioController());
+        levels.add(level5);
+
+        // Level 6
+        LevelConfigLoader.LevelConfig config6 = LevelConfigLoader.loadConfig("level6.txt");
+        Level level6 = new Level(
+            LoadSave.GetLevelData(LoadSave.LEVEL_SIX_DATA),
+            LoadSave.GetLevelObstacleData(LoadSave.LEVEL_SIX_OBSTACLE_DATA),
+            LoadSave.GetLevelObjData(LoadSave.LEVEL_SIX_OBJ_DATA),
+            config6.spawnX, config6.spawnY);
+        LevelConfigLoader.applyConfig(level6, config6, levelSprite, objectSprite, spawnTube);
+        level5.setAudioControllerForPlatforms(game.getAudioController());
+        levels.add(level6);
     }
 
     private void importOutsideSprites() {
@@ -143,16 +166,38 @@ public class LevelManager {
     }
 
     public Level getCurrentLvl() {
-        //return levels.get(0); // For Testing
-        return levels.get(currentLevelIndex);
+        return levels.get(5); // For Testing
+        //return levels.get(currentLevelIndex);
     }
     
     public void loadNextLevel() {
+        // Mark current level as completed (this also unlocks the next level)
+        markLevelCompleted(currentLevelIndex);
+        
         if (currentLevelIndex < levels.size() - 1) {
             currentLevelIndex++;
         } else {
+            // Last level completed - game finished
             // IMPLEMENT RETURN HOME? GAME FINISHED SCREEN?s
         }
+    }
+    
+    public void markCurrentLevelCompleted() {
+        markLevelCompleted(currentLevelIndex);
+    }
+    
+    public void markLevelCompleted(int levelIndex) {
+        if (levelIndex >= 0 && levelIndex < levels.size()) {
+            completedLevels.add(levelIndex);
+            // Unlock next level
+            if (levelIndex + 1 < levels.size()) {
+                completedLevels.add(levelIndex + 1);
+            }
+        }
+    }
+    
+    public boolean isLevelUnlocked(int levelIndex) {
+        return completedLevels.contains(levelIndex);
     }
     
     public int getLevelCount() {
@@ -161,6 +206,12 @@ public class LevelManager {
     
     public int getCurrentLevelIndex() {
         return currentLevelIndex;
+    }
+    
+    public void setCurrentLevelIndex(int index) {
+        if (index >= 0 && index < levels.size()) {
+            currentLevelIndex = index;
+        }
     }
 
     public void setLevelScore(int death){

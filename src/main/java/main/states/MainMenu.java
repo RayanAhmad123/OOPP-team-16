@@ -21,6 +21,7 @@ public class MainMenu {
         this.game = game;
 
         options.add("Play");
+        options.add("Select Level");
         options.add("Leaderboard");
         options.add("Quit");
 
@@ -95,9 +96,12 @@ public class MainMenu {
             game.setGameState(Game.GameState.PLAYING);
             break;
         case 1:
-            game.setGameState(Game.GameState.LEADERBOARD);
+            game.setGameState(Game.GameState.LEVEL_SELECT);
             break;
         case 2:
+            game.setGameState(Game.GameState.LEADERBOARD);
+            break;
+        case 3:
             System.exit(0);
             break;
         }

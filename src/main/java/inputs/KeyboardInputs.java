@@ -9,6 +9,7 @@ import main.GamePanel;
 public class KeyboardInputs implements KeyListener {
 
     private GamePanel gamePanel;
+    private boolean keyDown = false;
 
     public KeyboardInputs(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -35,7 +36,10 @@ public class KeyboardInputs implements KeyListener {
         case KeyEvent.VK_UP:
         case KeyEvent.VK_W:
             //Jump sound
-            gamePanel.getGame().getAudioController().playJump();
+            if (!keyDown) {
+                gamePanel.getGame().getAudioController().playJump();
+                keyDown = true;
+            }
             gamePanel.getGame().getPlayer().setJump(true);
             break;
         case KeyEvent.VK_ESCAPE:
@@ -61,6 +65,7 @@ public class KeyboardInputs implements KeyListener {
         case KeyEvent.VK_SPACE:
         case KeyEvent.VK_UP:
         case KeyEvent.VK_W:
+            keyDown = false; 
             gamePanel.getGame().getPlayer().setJump(false);
             break;
         default:

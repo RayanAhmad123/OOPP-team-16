@@ -19,6 +19,7 @@ public class LoadSave {
     public static final String BG_DATA = "Background.png";
     public static final String TRANSITION_IMG = "Transition.png";
     public static final String SPAWN_TUBE = "SpawnTube.png";
+    public static final String LOCK = "Lock.png";
 
     //LEVEL1
     public static final String LEVEL_ONE_DATA = "Level1.png";
@@ -32,6 +33,22 @@ public class LoadSave {
     public static final String LEVEL_THREE_DATA = "Level3.png";
     public static final String LEVEL_THREE_OBSTACLE_DATA = "Level3Obstacles.png";
     public static final String LEVEL_THREE_OBJ_DATA = "Level3Objects.png";
+    //LEVEL4
+    public static final String LEVEL_FOUR_DATA = "Level4.png";
+    public static final String LEVEL_FOUR_OBSTACLE_DATA = "Level4Obstacles.png";
+    public static final String LEVEL_FOUR_OBJ_DATA = "Level4Objects.png";
+    //LEVEL5
+    public static final String LEVEL_FIVE_DATA = "Level5.png";
+    public static final String LEVEL_FIVE_OBSTACLE_DATA = "Level5Obstacles.png";
+    public static final String LEVEL_FIVE_OBJ_DATA = "Level5Objects.png";
+    //LEVEL6
+    public static final String LEVEL_SIX_DATA = "Level6.png";
+    public static final String LEVEL_SIX_OBSTACLE_DATA = "Level6Obstacles.png";
+    public static final String LEVEL_SIX_OBJ_DATA = "Level6Objects.png";
+    //LEVEL7
+    public static final String LEVEL_SEVEN_DATA = "Level7.png";
+    public static final String LEVEL_SEVEN_OBSTACLE_DATA = "Level7Obstacles.png";
+    public static final String LEVEL_SEVEN_OBJ_DATA = "Level7Objects.png";
     
     public static BufferedImage GetSpriteAtlas(String fileName){
         BufferedImage img = null;

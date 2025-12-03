@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import audio.controller.AudioController;
+
 public class TriggerPlatform extends Entity {
     
     private float startX, startY;
@@ -33,6 +35,9 @@ public class TriggerPlatform extends Entity {
     // Original sprite bounds (for collision when hitbox is enlarged)
     private float originalX, originalY;
     private int originalWidth, originalHeight;
+    
+    // Audio controller for playing sounds
+    private AudioController audioController;
     
     public TriggerPlatform(float x, float y, float targetX, float targetY, 
                            int width, int height, float speed, BufferedImage sprite, boolean shouldReturn) {
@@ -149,7 +154,12 @@ public class TriggerPlatform extends Entity {
     }
     
     public void trigger() {
-        triggered = true;
+        if (!triggered) { // Only play sound on first trigger
+            triggered = true;
+            if (audioController != null) {
+                audioController.playPlatformSound();
+            }
+        }
     }
     
     public boolean isTriggered() {
@@ -195,6 +205,10 @@ public class TriggerPlatform extends Entity {
     
     public boolean isSolid() {
         return solid;
+    }
+    
+    public void setAudioController(AudioController audioController) {
+        this.audioController = audioController;
     }
     
     // Get the sprite hitbox (the actual collidable area for standing)

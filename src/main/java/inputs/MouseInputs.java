@@ -25,6 +25,8 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
         Game game = panel.getGame();
         if (game.getGameState() == Game.GameState.MENU) {
             game.mainMenu.mouseMoved(e.getX(), e.getY());
+        } else if (game.getGameState() == Game.GameState.LEVEL_SELECT) {
+            game.levelSelect.mouseMoved(e.getX(), e.getY());
         }
     }
 
@@ -46,6 +48,8 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
         Game game = panel.getGame();
         if (game.getGameState() == Game.GameState.MENU) {
             game.mainMenu.mousePressed(e.getX(), e.getY());
+        } else if (game.getGameState() == Game.GameState.LEVEL_SELECT) {
+            game.levelSelect.mousePressed(e.getX(), e.getY());
         }
     }
 
