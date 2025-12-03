@@ -218,6 +218,12 @@ public class Level {
         triggerPlatforms.add(platform);
     }
     
+    public void setAudioControllerForPlatforms(audio.controller.AudioController audioController) {
+        for (TriggerPlatform platform : triggerPlatforms) {
+            platform.setAudioController(audioController);
+        }
+    }
+    
     public void updatePlatforms(Entity player) {
         for (MovingPlatform platform : movingPlatforms) {
             platform.update();

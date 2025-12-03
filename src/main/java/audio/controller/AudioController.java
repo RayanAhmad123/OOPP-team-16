@@ -1,11 +1,11 @@
 package audio.controller;
 
+import java.net.URL;
+
 import javafx.application.Platform;
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.AudioClip;
-
-import java.net.URL;
 
 public class AudioController {
     private MediaPlayer menuPlayer;
@@ -16,7 +16,11 @@ public class AudioController {
 
     //has to be static to be called on by keyboardinputs later.
     //add more down here if needed (sound effects).
-    private AudioClip jumpSound;
+    private static AudioClip jumpSound;
+    private static AudioClip deadSound;
+    private static AudioClip spawnSound;
+    private static AudioClip nextLevelSound;
+    private static AudioClip platformSound;
 
     private static boolean javaFXStarted = false;
 
@@ -48,6 +52,10 @@ public class AudioController {
         gamePlayer.setCycleCount(MediaPlayer.INDEFINITE);
 
         jumpSound = loadSoundClip("/audio/resources/jump.mp3");
+        deadSound = loadSoundClip("/audio/resources/Dead.mp3");
+        spawnSound = loadSoundClip("/audio/resources/Respawn.mp3");
+        nextLevelSound = loadSoundClip("/audio/resources/NextLevel.mp3");
+        platformSound = loadSoundClip("/audio/resources/Platform.mp3");
     }
 
     private MediaPlayer loadMedia(String name) {
@@ -61,15 +69,31 @@ public class AudioController {
     }
 
     public void playMenuMusic() {
-        Platform.runLater(() -> changeState(menuPlayer));
+        //Platform.runLater(() -> changeState(menuPlayer));
     }
 
     public void playGameMusic() {
-        Platform.runLater(() -> changeState(gamePlayer));
+        //Platform.runLater(() -> changeState(gamePlayer));
     }
 
     public void playJump() {
         jumpSound.play();
+    }
+
+    public void playDead() {
+        deadSound.play();
+    }
+
+    public void playNextLevel() {
+        nextLevelSound.play();
+    }
+
+    public void playRespawn() {
+        spawnSound.play();
+    }
+
+    public void playPlatformSound() {
+        platformSound.play();
     }
 
     public void stopAll() {

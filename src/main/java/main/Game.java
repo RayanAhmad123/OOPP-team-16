@@ -9,6 +9,7 @@ import Levels.LevelManager;
 import audio.controller.AudioController;
 import entities.Player;
 import main.states.Leaderboard;
+import main.states.LevelSelect;
 import main.states.MainMenu;
 import utilz.LoadSave;
 
@@ -32,12 +33,13 @@ public class Game implements Runnable {
     public final static int GAME_WIDTH = TILES_SIZE * TILES_IN_WIDTH;
     public final static int GAME_HEIGHT = TILES_SIZE * TILES_IN_HEIGHT;
 
-    public enum GameState {MENU, PLAYING, LEADERBOARD}
+    public enum GameState {MENU, PLAYING, LEADERBOARD, LEVEL_SELECT}
 
     private GameState gameState = GameState.MENU;
 
     public MainMenu mainMenu;
     public Leaderboard leaderboard;
+    public LevelSelect levelSelect;
 
     // Level transition
     private BufferedImage transitionImage;
@@ -71,6 +73,7 @@ public class Game implements Runnable {
         transitionImage = LoadSave.GetSpriteAtlas(LoadSave.TRANSITION_IMG);
 
         mainMenu = new MainMenu(this);
+        levelSelect = new LevelSelect(this, levelManager);
     }
 
     private void loadPlayerForCurrentLevel() {
@@ -94,10 +97,12 @@ public class Game implements Runnable {
             boolean playerCurrentlyDead = player.getHitbox().x > 1500;
             if (!playerWasDead && playerCurrentlyDead) {
                 // Player just died
+                audioController.playDead();
                 levelManager.getCurrentLvl().triggerSpawnPlatform();
             }
             if (playerWasDead && !playerCurrentlyDead) {
                 // Player just respawned
+                audioController.playRespawn();
                 levelManager.getCurrentLvl().resetPlatforms();
             }
             playerWasDead = playerCurrentlyDead;
@@ -111,6 +116,9 @@ public class Game implements Runnable {
         case MENU:
             mainMenu.update();
             break;
+        case LEVEL_SELECT:
+            levelSelect.update();
+            break;
         case LEADERBOARD:
             //leaderboard.update(); TODOOOO
             break;
@@ -118,6 +126,7 @@ public class Game implements Runnable {
     }
 
     private void startLevelTransition() {
+        audioController.playNextLevel();
         inTransition = true;
         scalingUp = true;
         levelLoaded = false;
@@ -161,6 +170,9 @@ public class Game implements Runnable {
             break;
         case MENU:
             mainMenu.draw(g);
+            break;
+        case LEVEL_SELECT:
+            levelSelect.draw(g);
             break;
         case LEADERBOARD:
             // leaderboard placeholder
@@ -272,6 +284,7 @@ public class Game implements Runnable {
 
         switch (newState) {
         case MENU -> audioController.playMenuMusic();
+        case LEVEL_SELECT -> audioController.playMenuMusic();
         case PLAYING -> audioController.playGameMusic();
         case LEADERBOARD -> audioController.stopAll();
         }
