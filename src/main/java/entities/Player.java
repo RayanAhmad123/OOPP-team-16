@@ -65,7 +65,7 @@ public class Player extends Entity {
         spawnY = y;
     }
 
-    public void setPlayerEventListener(PlayerEventListener listener) {
+    public void setPlayerEventListener(Game listener) {
         this.playerEventListener = listener;
     }
 
