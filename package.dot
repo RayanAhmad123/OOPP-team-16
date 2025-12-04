@@ -1,0 +1,30 @@
+digraph "package" {
+
+splines  = ortho;
+fontname = "Inconsolata";
+
+node [colorscheme = ylgnbu4];
+edge [colorscheme = dark28, dir = both];
+
+Game                   [shape = record, pos = "-1.694,0.549!"    , label = "{ Game | + Game() : \l|- gameState : GameState\l - player : Player\l - audioController : AudioController\l - levelManager : LevelManager\l|- update() : void\l + windowFocusLost() : void\l - loadPlayerForCurrentLevel() : void\l + render(Graphics) : void\l + onPlayerDeath() : void\l + levelCompletedScoringUpdate() : void\l - initClasses() : void\l - startGameLoop() : void\l + renderGame(Graphics) : void\l + reloadPlayerForCurrentLevel() : void\l + updateGameState() : void\l + run() : void\l + togglePause() : void\l| gameState : GameState\l  player : Player\l  playerName : String\l  audioController : AudioController\l  levelManager : LevelManager\l }"];
+GameModel              [shape = record, pos = "-7.688,9.284!"    , label = "{ GameModel | + GameModel(Player, LevelManager) : \l|- runStartTimeNanos : long\l - gameState : GameState\l - inTransition : boolean\l - paused : boolean\l - transitionScale : float\l - levelManager : LevelManager\l - totalDeathsForRun : int\l - playerName : String\l - player : Player\l|+ checkIsEndOfLevel() : boolean\l + togglePause() : void\l + checkIsDead() : boolean\l + checkIsRespawn() : boolean\l + startNewRunTimer() : void\l + onPlayerDeath() : void\l + updateTransition() : void\l + startLevelTransition() : void\l + updatePlaying() : void\l + resetRunStats() : void\l| runStartTimeNanos : long\l  inTransition : boolean\l  transitionScale : float\l  playerName : String\l  totalDeathsForRun : int\l  levelManager : LevelManager\l  gameState : GameState\l  player : Player\l  paused : boolean\l }"];
+GamePanel              [shape = record, pos = "-0.788,7.397!"    , label = "{ GamePanel | + GamePanel(Game) : \l|- game : Game\l|- setPanelSize() : void\l + updateGame() : void\l + paintComponent(Graphics) : void\l| game : Game\l }"];
+GameView               [shape = record, pos = "4.706,3.531!"     , label = "{ GameView | + GameView(GameModel) : \l|- drawHUD(Graphics) : void\l - drawPauseOverlay(Graphics) : void\l + renderGame(Graphics) : void\l + renderTransition(Graphics, BufferedImage) : void\l }"];
+GameWindow             [shape = record, pos = "4.425,-2.259!"    , label = "{ GameWindow | + GameWindow(GamePanel) : \l }"];
+MainClass              [shape = record, pos = "-8.243,-3.686!"   , label = "{ MainClass | + MainClass() : \l|+ main(String[]) : void\l }"];
+"package  main.events" [shape = record, pos = "-1.167,-9.113!"   , label = "{ \<\<package\>\>\npackage  main.events |  }"];
+"package  main.states" [shape = record, pos = "10.983,1.683!"    , label = "{ \<\<package\>\>\npackage  main.states |  }"];
+
+Game                   -> GameModel              [color = "#595959", style = dashed, arrowtail = none    , arrowhead = vee     , taillabel = "", label = "«create»", headlabel = ""];
+Game                   -> GameModel              [color = "#595959", style = solid , arrowtail = diamond , arrowhead = vee     , taillabel = "1", label = "", headlabel = "model\n1"];
+Game                   -> GamePanel              [color = "#595959", style = dashed, arrowtail = none    , arrowhead = vee     , taillabel = "", label = "«create»", headlabel = ""];
+Game                   -> GamePanel              [color = "#595959", style = solid , arrowtail = diamond , arrowhead = vee     , taillabel = "1", label = "", headlabel = "gamePanel\n1"];
+Game                   -> GameView               [color = "#595959", style = solid , arrowtail = diamond , arrowhead = vee     , taillabel = "1", label = "", headlabel = "view\n1"];
+Game                   -> GameView               [color = "#595959", style = dashed, arrowtail = none    , arrowhead = vee     , taillabel = "", label = "«create»", headlabel = ""];
+Game                   -> GameWindow             [color = "#595959", style = dashed, arrowtail = none    , arrowhead = vee     , taillabel = "", label = "«create»", headlabel = ""];
+Game                   -> GameWindow             [color = "#595959", style = solid , arrowtail = diamond , arrowhead = vee     , taillabel = "1", label = "", headlabel = "gameWindow\n1"];
+GamePanel              -> Game                   [color = "#595959", style = solid , arrowtail = diamond , arrowhead = vee     , taillabel = "1", label = "", headlabel = "game\n1"];
+GameView               -> GameModel              [color = "#595959", style = solid , arrowtail = diamond , arrowhead = vee     , taillabel = "1", label = "", headlabel = "model\n1"];
+MainClass              -> Game                   [color = "#595959", style = dashed, arrowtail = none    , arrowhead = vee     , taillabel = "", label = "«create»", headlabel = ""];
+
+}
