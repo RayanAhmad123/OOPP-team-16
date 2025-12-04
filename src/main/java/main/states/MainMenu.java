@@ -17,10 +17,14 @@ public class MainMenu {
     private Font titleFont = new Font("Arial", Font.BOLD, 48);
     private Font optionsFont = new Font("Arial", Font.PLAIN, 24);
 
+    private boolean editingName = false;
+    private StringBuilder nameBuffer = new StringBuilder();
+
     public MainMenu(Game game) {
         this.game = game;
 
         options.add("Play");
+        options.add("Change Player Name");
         options.add("Select Level");
         options.add("Leaderboard");
         options.add("Quit");
@@ -51,6 +55,11 @@ public class MainMenu {
         int textNumber = (Game.GAME_WIDTH - fontmetrics.stringWidth(title)) / 2;
         g.drawString(title, textNumber, 150);
 
+        // current player name
+        g.setFont(new Font("Arial", Font.PLAIN, 20));
+        String nameText = "Player: " + game.getPlayerName();
+        g.drawString(nameText, 20, 40);
+
         // the several options displayed:
         g.setFont(optionsFont);
         FontMetrics ofm = g.getFontMetrics();
@@ -67,10 +76,26 @@ public class MainMenu {
             int sy = rectangle.y + (rectangle.height + ofm.getAscent()) / 2 - 4;
             g.drawString(options.get(i), sx, sy);
         }
+
+        if (editingName) {
+            g.setFont(new Font("Arial", Font.PLAIN, 18));
+            g.setColor(Color.WHITE);
+            String prompt = "Enter name (letters/numbers), ENTER to confirm, ESC to cancel";
+            int pw = g.getFontMetrics().stringWidth(prompt);
+            int px = (Game.GAME_WIDTH - pw) / 2;
+            int py = Game.GAME_HEIGHT - 80;
+            g.drawString(prompt, px, py);
+            String current = nameBuffer.toString();
+            int cw = g.getFontMetrics().stringWidth(current + "_");
+            int cx = (Game.GAME_WIDTH - cw) / 2;
+            g.drawString(current + "_", cx, py + 30);
+        }
     }
 
-    //for dynamic "mouse hoover", haptics
     public void mouseMoved(int x, int y) {
+        if (editingName) {
+            return;
+        }
         selected = -1;
         for (int i = 0; i < bounds.size(); i++) {
             if (bounds.get(i).contains(x, y)) {
@@ -79,8 +104,11 @@ public class MainMenu {
             }
         }
     }
-    //for dynamic "mouse hoover", haptics
+
     public void mousePressed(int x, int y) {
+        if (editingName) {
+            return;
+        }
         for (int i = 0; i < bounds.size(); i++) {
             if (bounds.get(i).contains(x, y)) {
                 handleSelection(i);
@@ -104,6 +132,42 @@ public class MainMenu {
         case 3:
             System.exit(0);
             break;
+        }
+    }
+
+    private void startEditingName() {
+        editingName = true;
+        nameBuffer.setLength(0);
+        nameBuffer.append(game.getPlayerName());
+    }
+
+    public boolean isEditingName() {
+        return editingName;
+    }
+
+    public void handleNameKeyPressed(int keyCode, char keyChar) {
+        if (!editingName) return;
+
+        if (keyCode == java.awt.event.KeyEvent.VK_ENTER) {
+            if (!nameBuffer.isEmpty()) {
+                game.setPlayerName(nameBuffer.toString());
+            }
+            editingName = false;
+            return;
+        }
+        if (keyCode == java.awt.event.KeyEvent.VK_ESCAPE) {
+            editingName = false;
+            return;
+        }
+        if (keyCode == java.awt.event.KeyEvent.VK_BACK_SPACE) {
+            if (!nameBuffer.isEmpty()) {
+                nameBuffer.deleteCharAt(nameBuffer.length() - 1);
+            }
+            return;
+        }
+
+        if (keyCode == 0 && Character.isLetterOrDigit(keyChar) && nameBuffer.length() < 16) {
+            nameBuffer.append(keyChar);
         }
     }
 }

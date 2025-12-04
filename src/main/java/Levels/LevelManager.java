@@ -225,4 +225,8 @@ public class LevelManager {
         }
         return levelSprite[0];
     }
+
+    public void resetToFirstLevel() {
+        currentLevelIndex = 0;
+    }
 }

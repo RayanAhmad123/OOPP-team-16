@@ -45,8 +45,8 @@ public class Player extends Entity{
     private boolean reachedLevelEnd = false;
     private int currDeathCount = 0;
     private Levels.Level currentLevel;
-    
-    
+    private Game game; // reference to notify game about deaths
+
     
     
     
@@ -57,7 +57,10 @@ public class Player extends Entity{
         initHitbox(x, y , 12*Game.SCALE, 22*Game.SCALE);
         spawnX = x;
         spawnY = y;
-        
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     public void update(){
@@ -75,6 +78,9 @@ public class Player extends Entity{
         }
         if (IsOnLevelEnd(hitbox, lvlData)) {
             reachedLevelEnd = true;
+            if (game != null) {
+                game.onLevelCompleted();
+            }
         }
         updatePos();
         updateAnimationTick();
@@ -91,6 +97,9 @@ public class Player extends Entity{
     
     private void die() {
         currDeathCount += 1;
+        if (game != null) {
+            game.onPlayerDeath();
+        }
         isDead = true;
         deathTime = System.currentTimeMillis();
         
@@ -316,5 +325,3 @@ public class Player extends Entity{
         this.currentLevel = level;
     }
 }
-
-

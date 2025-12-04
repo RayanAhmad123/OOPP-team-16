@@ -2,8 +2,16 @@ package utilz;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -49,79 +57,138 @@ public class LoadSave {
     public static final String LEVEL_SEVEN_DATA = "Level7.png";
     public static final String LEVEL_SEVEN_OBSTACLE_DATA = "Level7Obstacles.png";
     public static final String LEVEL_SEVEN_OBJ_DATA = "Level7Objects.png";
-    
+
     public static BufferedImage GetSpriteAtlas(String fileName){
+
+    private static final String LEADERBOARD_FILE_NAME = "leaderboard.txt";
+
+    public static BufferedImage GetSpriteAtlas(String fileName) {
         BufferedImage img = null;
         InputStream is = LoadSave.class.getResourceAsStream("/" + fileName);
 
         try {
+            if (is == null) {
+                System.err.println("Could not load image: /" + fileName);
+                return null;
+            }
             img = ImageIO.read(is);
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {
-                is.close();
-            }catch (IOException e) {
-                e.printStackTrace();
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return img;
     }
 
-    public static int[][] GetLevelData(String levelFileName){
+    public static int[][] GetLevelData(String levelFileName) {
         int[][] lvlData = new int[Game.TILES_IN_HEIGHT][Game.TILES_IN_WIDTH];
         BufferedImage img = GetSpriteAtlas(levelFileName);
-
-
-        for (int j = 0; j < (int)img.getHeight(); j++) {
-           for (int i = 0; i < (int)img.getWidth(); i++) {
+        if (img == null) {
+            return lvlData;
+        }
+        for (int j = 0; j < (int) img.getHeight(); j++) {
+            for (int i = 0; i < (int) img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
                 int value = color.getRed();
-                if (value >= 80 ) {
+                if (value >= 80) {
                     value = 80;
                 }
                 lvlData[j][i] = value;
-           } 
+            }
         }
         return lvlData;
     }
 
-    public static int[][] GetLevelObstacleData(String levelFileName){
+    public static int[][] GetLevelObstacleData(String levelFileName) {
         int[][] lvlData = new int[Game.TILES_IN_HEIGHT][Game.TILES_IN_WIDTH];
         BufferedImage img = GetSpriteAtlas(levelFileName);
-
-
-        for (int j = 0; j < (int)img.getHeight(); j++) {
-           for (int i = 0; i < (int)img.getWidth(); i++) {
+        if (img == null) {
+            return lvlData;
+        }
+        for (int j = 0; j < (int) img.getHeight(); j++) {
+            for (int i = 0; i < (int) img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
                 int value = color.getGreen();
-                if (value >= 80 ) {
+                if (value >= 80) {
                     value = 80;
                 }
                 lvlData[j][i] = value;
-           } 
+            }
         }
         return lvlData;
     }
 
-        public static int[][] GetLevelObjData(String levelFileName){
+    public static int[][] GetLevelObjData(String levelFileName) {
         int[][] lvlData = new int[Game.TILES_IN_HEIGHT][Game.TILES_IN_WIDTH];
         BufferedImage img = GetSpriteAtlas(levelFileName);
-
-
-        for (int j = 0; j < (int)img.getHeight(); j++) {
-           for (int i = 0; i < (int)img.getWidth(); i++) {
+        if (img == null) {
+            return lvlData;
+        }
+        for (int j = 0; j < (int) img.getHeight(); j++) {
+            for (int i = 0; i < (int) img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
                 int value = color.getBlue();
-                if (value >= 80 ) {
+                if (value >= 80) {
                     value = 80;
                 }
                 lvlData[j][i] = value;
-           } 
+            }
         }
         return lvlData;
     }
 
+    private static Path getLeaderboardPath() {
+        Path path = Paths.get("src", "main", "resources");
+
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return path.resolve(LEADERBOARD_FILE_NAME);
+    }
+
+    public static void appendToScoreFile(String playerName, int levelIndex, double time, int deaths) {
+        Path path = getLeaderboardPath();
+        int humanLevel = levelIndex + 1;
+
+        //; delimitter
+        String line = playerName + ";" + humanLevel + ";" + deaths + ";" + String.format("%.4f", time);
+        //monster code? yes, you are right, did not get it to work otherwise.
+        try (BufferedWriter writer = Files.newBufferedWriter(
+                path,
+                StandardCharsets.UTF_8,
+                java.nio.file.StandardOpenOption.CREATE,
+                java.nio.file.StandardOpenOption.APPEND)) {
+            writer.write(line);
+            writer.newLine();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> readScoreFile() {
+        List<String> lines = new ArrayList<>();
+        Path path = getLeaderboardPath();
+        if (!Files.exists(path)) {
+            return lines;
+        }
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines;
+    }
 }
