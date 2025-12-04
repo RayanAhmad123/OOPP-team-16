@@ -128,21 +128,23 @@ public class Game implements Runnable, PlayerEventListener {
         view.renderTransition(g, transitionImage);
     }
 
-    //TODO ADD EVENTLISTENERS HERE!!!!
+    //TODO maybe check if we can move this into observer patterns?
     public void updateGameState() {
         model.updatePlaying();
 
-        //Abstract so that it listens for "PlayerD"
+        //TODO Abstract so that it listens for "PlayerDeath"
         if (model.checkIsDead()) {
             audioController.playDead();
             levelManager.getCurrentLvl().triggerSpawnPlatform();
         }
+
+        ///TODO Abstract so that it listens for "PlayerRespawn"
         if (model.checkIsRespawn()) {
             audioController.playRespawn();
             levelManager.getCurrentLvl().resetPlatforms();
         }
 
-        //Abstract so that it listens for "LvlCompletedEvent"
+        //TODO Abstract so that it listens for "LvlCompletedEvent"
         if (model.checkIsEndOfLevel()) {
             levelCompletedScoringUpdate();
             audioController.playNextLevel();
@@ -234,7 +236,7 @@ public class Game implements Runnable, PlayerEventListener {
         model.setGameState(newState);
 
         GameBaseState previousState = currentState;
-        // Going back to main menu will reset all!
+        //TODO Move into playingState: onExit
         if (newState == GameState.MENU && oldState == GameState.PLAYING) {
             levelManager.resetToFirstLevel();
             model.resetRunStats();
@@ -243,7 +245,8 @@ public class Game implements Runnable, PlayerEventListener {
 
 
 
-        // If we are starting to play from the menu, start a fresh run (timer & deaths), for leaderboard
+        //TODO Move into playingState: onEnter
+        //If we are starting to play from the menu, start a fresh run (timer & deaths), for leaderboard
         if (newState == GameState.PLAYING && oldState == GameState.MENU) {
             model.startNewRunTimer();
         }
@@ -266,6 +269,7 @@ public class Game implements Runnable, PlayerEventListener {
         }
     }
 
+    //TODO move into EventListner / Observer abstration here?
     @Override
     public void onPlayerDeath() {
         model.onPlayerDeath();
@@ -275,6 +279,7 @@ public class Game implements Runnable, PlayerEventListener {
         }
     }
 
+    //TODO move into EventListner / Observer abstration here?
     public void levelCompletedScoringUpdate() {
         long runEndTimeNanos = System.nanoTime();
         double timeMilliSeconds = (runEndTimeNanos - model.getRunStartTimeNanos()) / 1000000.0;
