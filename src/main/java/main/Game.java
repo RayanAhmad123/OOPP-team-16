@@ -63,7 +63,7 @@ public class Game implements Runnable {
     private GameView view;
 
     public Game() {
-        audioController = AudioController.getInstance();
+        audioController = new AudioController();
         initClasses();
         gamePanel = new GamePanel(this);
         gameWindow = new GameWindow(gamePanel);
